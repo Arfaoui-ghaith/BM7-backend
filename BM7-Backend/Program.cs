@@ -1,12 +1,16 @@
-using DbExploration.Data;
+using BM7_Backend.Context;
+using BM7_Backend.Interfaces;
+using BM7_Backend.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Database Connection
-builder.Services.AddEntityFrameworkNpgsql().AddDbContext<ApiDbContext>(opt =>
+builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MyDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("BM7Connection")));
 
+// Assign Interfaces to Repositories
+builder.Services.AddScoped<UserInterface, UserRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -24,6 +28,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
