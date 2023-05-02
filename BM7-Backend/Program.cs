@@ -11,9 +11,11 @@ builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MyDbContext>(opt =>
 
 // Assign Interfaces to Repositories
 builder.Services.AddScoped<UserInterface, UserRepository>();
+builder.Services.AddScoped<CategoryInterface, CategoryRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
