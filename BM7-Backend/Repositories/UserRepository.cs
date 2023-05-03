@@ -22,7 +22,7 @@ public class UserRepository : UserInterface
         return _dbContext.Users.Any(u => u.id == id);
     }
 
-    public User GetUser(Guid id)
+    public User? GetUser(Guid id)
     {
         return _dbContext.Users.FirstOrDefault(u => u.id == id);
     }
@@ -37,7 +37,19 @@ public class UserRepository : UserInterface
         _dbContext.Add(user);
         return Save();
     }
-    
+
+    public bool UpdateUser(User user)
+    {
+        _dbContext.Update(user);
+        return Save();
+    }
+
+    public bool DeleteUser(User user)
+    {
+        _dbContext.Remove(user);
+        return Save();
+    }
+
     public bool Save()
     {
         var saved = _dbContext.SaveChanges();

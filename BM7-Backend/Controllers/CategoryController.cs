@@ -1,3 +1,5 @@
+using AutoMapper;
+using BM7_Backend.Dto;
 using BM7_Backend.Interfaces;
 using BM7_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +12,14 @@ public class CategoryController : Controller
 {
     private readonly CategoryInterface _categoryInterface;
     private readonly UserInterface _userInterface;
+    private readonly IMapper _mapper;
 
 
-    public CategoryController(CategoryInterface categoryInterface, UserInterface userInterface)
+    public CategoryController(CategoryInterface categoryInterface, UserInterface userInterface, IMapper mapper)
     {
         _categoryInterface = categoryInterface;
         _userInterface = userInterface;
+        _mapper = mapper;
     }
 
     [HttpGet("{userId}")]
@@ -26,11 +30,44 @@ public class CategoryController : Controller
         if (!_userInterface.UserExists(userId))
             return NotFound();
         
-        var categories = _categoryInterface.getCategoriesByUser(userId);
+        var categories = _categoryInterface.GetCategoriesByUser(userId);
+        
+        Console.WriteLine(categories.ToString());
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         return Ok(categories);
+    }
+    
+    [HttpPost]
+    [ProducesResponseType(201, Type = typeof(User))]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(422)]
+    public IActionResult CreateCategory([FromBody] NewCategoryDto category)
+    {
+        if (category == null)
+            return BadRequest();
+        
+        if (!_userInterface.UserExists(category.userId))
+            return NotFound();
+
+        var user = _userInterface.GetUser(category.userId);
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        var newCategory = _mapper.Map<Category>(category);
+
+        newCategory.user = user;
+
+        if (!_categoryInterface.CreateCategory(newCategory))
+        {
+            ModelState.AddModelError("", "Something went wrong while saving!");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Category created successfully!");
     }
 }

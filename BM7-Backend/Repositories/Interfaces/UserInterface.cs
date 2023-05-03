@@ -8,11 +8,15 @@ public interface UserInterface
     
     bool UserExists(Guid id);
 
-    User GetUser(Guid id);
+    User? GetUser(Guid id);
 
     bool CheckUserByEmail(String email);
 
     bool CreateUser(User user);
+    
+    bool UpdateUser(User user);
+    
+    bool DeleteUser(User user);
 
     bool Save();
 }

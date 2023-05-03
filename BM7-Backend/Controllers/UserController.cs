@@ -16,7 +16,6 @@ public class UserController : Controller
 {
     private readonly UserInterface _userInterface;
     private readonly IMapper _mapper;
-    private readonly HashPassword _hashPassword;
 
 
     public UserController(UserInterface userInterface, IMapper mapper)
@@ -93,5 +92,84 @@ public class UserController : Controller
         return Ok("User created successfully!");
     }
     
+    [HttpPut("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public IActionResult UpdateUser(Guid id, [FromBody] UpdatedUserDto updatedUser)
+    {
+        if (updatedUser == null)
+            return BadRequest(ModelState);
+
+        if (!_userInterface.UserExists(id))
+            return NotFound();
+
+        var user = _userInterface.GetUser(id);
+
+        if (user.email != updatedUser.email)
+        {
+            if (_userInterface.CheckUserByEmail(updatedUser.email))
+            {
+                ModelState.AddModelError("", "Email Already Exists!");
+                return StatusCode(422, ModelState);
+            }
+        }
+
+        user.email = updatedUser.email;
+        user.name = updatedUser.name;
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        if (!_userInterface.UpdateUser(user))
+        {
+            ModelState.AddModelError("", "Something went wrong updating user");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
+    
+    [HttpPost("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public IActionResult UpdateUserPassword(Guid id, [FromBody] UpdatedUserPasswordDto updatedUser)
+    {
+        if (updatedUser == null)
+            return BadRequest(ModelState);
+
+        if (!_userInterface.UserExists(id))
+            return NotFound();
+
+        var user = _userInterface.GetUser(id);
+        
+        updatedUser.hash();
+
+        if (user.password != updatedUser.current_password)
+        {
+            ModelState.AddModelError("", "Wrong current password!");
+            return StatusCode(401, ModelState);
+        }
+
+        if (updatedUser.password != updatedUser.confirmPassword)
+        {
+            ModelState.AddModelError("", "Password Not Match!");
+            return StatusCode(401, ModelState);
+        }
+
+        user.password = updatedUser.password;
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        if (!_userInterface.UpdateUser(user))
+        {
+            ModelState.AddModelError("", "Something went wrong updating user");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
 
 }
