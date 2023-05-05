@@ -9,6 +9,8 @@ public interface CategoryInterface
     bool CategoryExists(Guid id);
 
     Category GetCategory(Guid id);
+
+    bool CategoryUniqueTitleByUser(Guid userId, Guid categoryId, String title);
     
     bool CreateCategory(Category category);
 

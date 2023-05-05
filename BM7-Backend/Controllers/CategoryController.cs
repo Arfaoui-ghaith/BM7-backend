@@ -70,4 +70,65 @@ public class CategoryController : Controller
 
         return Ok("Category created successfully!");
     }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    public IActionResult UpdateCategory(Guid id, [FromBody] UpdatedCategoryDto updatedCategory)
+    {
+        if (updatedCategory == null)
+            return BadRequest(ModelState);
+
+        if (!_categoryInterface.CategoryExists(id))
+            return NotFound();
+        
+        var category = _categoryInterface.GetCategory(id);
+
+        if (_categoryInterface.CategoryUniqueTitleByUser(category.user.id, id, updatedCategory.title))
+        {
+            ModelState.AddModelError("", "Title already used !");
+            return StatusCode(403, ModelState);
+        }
+
+        category.title = updatedCategory.title;
+        category.image = updatedCategory.image;
+        category.updatedAt = DateTime.UtcNow;
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        if (!_categoryInterface.UpdateCategory(category))
+        {
+            ModelState.AddModelError("", "Something went wrong updating category");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
+    
+    [HttpDelete("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteCategory(Guid id)
+    {
+        if (!_categoryInterface.CategoryExists(id))
+        {
+            return NotFound();
+        }
+
+        var category = _categoryInterface.GetCategory(id);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_categoryInterface.DeleteCategory(category))
+        {
+            ModelState.AddModelError("", "Something went wrong deleting category");
+        }
+
+        return NoContent();
+    }
 }

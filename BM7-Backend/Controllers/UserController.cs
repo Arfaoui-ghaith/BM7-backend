@@ -117,6 +117,7 @@ public class UserController : Controller
 
         user.email = updatedUser.email;
         user.name = updatedUser.name;
+        user.updatedAt = DateTime.UtcNow;
 
         if (!ModelState.IsValid)
             return BadRequest();
@@ -159,6 +160,8 @@ public class UserController : Controller
         }
 
         user.password = updatedUser.password;
+        
+        user.updatedAt = DateTime.UtcNow;
 
         if (!ModelState.IsValid)
             return BadRequest();
@@ -167,6 +170,30 @@ public class UserController : Controller
         {
             ModelState.AddModelError("", "Something went wrong updating user");
             return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
+    
+    [HttpDelete("{userId}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteUser(Guid userId)
+    {
+        if (!_userInterface.UserExists(userId))
+        {
+            return NotFound();
+        }
+
+        var user = _userInterface.GetUser(userId);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_userInterface.DeleteUser(user))
+        {
+            ModelState.AddModelError("", "Something went wrong deleting user");
         }
 
         return NoContent();

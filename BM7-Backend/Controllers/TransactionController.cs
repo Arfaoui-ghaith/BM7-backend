@@ -4,6 +4,7 @@ using BM7_Backend.Interfaces;
 using BM7_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Type = BM7_Backend.Models.Type;
 
 namespace BM7_Backend.Controllers;
 
@@ -26,7 +27,7 @@ public class TransactionController : Controller
     
     [HttpGet("{userId}")]
     [ProducesResponseType(200, Type = typeof(IEnumerable<Transaction>))]
-    public IActionResult GetTransactions(Guid userId)
+    public IActionResult GetTransactionsByUser(Guid userId)
     {
 
         var transactions = _mapper.Map<List<Transaction>>(_transactionInterface.GetTransactionsByUser(userId));
@@ -42,22 +43,22 @@ public class TransactionController : Controller
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [ProducesResponseType(422)]
-    public IActionResult CreateTransaction([FromBody] Transaction transaction)
+    public IActionResult CreateTransaction([FromBody] NewTransactionDto transaction)
     {
         if (transaction == null)
             return BadRequest();
         
-        /*if (!_categoryInterface.CategoryExists(transaction.categoryId))
+        if (!_categoryInterface.CategoryExists(transaction.categoryId))
             return NotFound();
-
+        
         var category = _categoryInterface.GetCategory(transaction.categoryId);
-
+        
         if (!ModelState.IsValid)
-            return BadRequest();*/
+            return BadRequest();
 
         var newTransaction = _mapper.Map<Transaction>(transaction);
-
-        //newTransaction.category = category;
+        
+        newTransaction.category = category;
 
         if (!_transactionInterface.CreateTransaction(newTransaction))
         {
@@ -66,5 +67,63 @@ public class TransactionController : Controller
         }
 
         return Ok("Transaction created successfully!");
+    }
+    
+    [HttpPut("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    public IActionResult UpdateTransaction(Guid id, [FromBody] UpdatedTransactionDto updatedTransaction)
+    {
+        if (updatedTransaction == null)
+            return BadRequest(ModelState);
+
+        if (!_transactionInterface.TransactionExists(id))
+            return NotFound();
+        
+        var transaction = _transactionInterface.GetTransaction(id);
+
+
+        transaction.amount = updatedTransaction.amount;
+        transaction.title = updatedTransaction.title;
+        Type type = updatedTransaction.type == 0 ? Type.INCOME : Type.EXPENSE;
+        transaction.type = type;
+        transaction.updatedAt = DateTime.UtcNow;
+
+        if (!ModelState.IsValid)
+            return BadRequest();
+
+        if (!_transactionInterface.UpdateTransaction(transaction))
+        {
+            ModelState.AddModelError("", "Something went wrong updating transaction");
+            return StatusCode(500, ModelState);
+        }
+
+        return NoContent();
+    }
+    
+    [HttpDelete("{id}")]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteTransaction(Guid id)
+    {
+        if (!_transactionInterface.TransactionExists(id))
+        {
+            return NotFound();
+        }
+
+        var transaction = _transactionInterface.GetTransaction(id);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!_transactionInterface.DeleteTransaction(transaction))
+        {
+            ModelState.AddModelError("", "Something went wrong deleting transaction");
+        }
+
+        return NoContent();
     }
 }

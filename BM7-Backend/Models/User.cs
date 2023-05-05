@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace BM7_Backend.Models;
 
-public class User
+public class User : IdentityUser
 {
     [Key, Required]
     public Guid id { get; set; } = Guid.NewGuid();
