@@ -30,7 +30,7 @@ public class CategoryController : Controller
         if (!_userInterface.UserExists(userId))
             return NotFound();
         
-        var categories = _categoryInterface.GetCategoriesByUser(userId);
+        var categories = _mapper.Map<List<CategoryDto>>(_categoryInterface.GetCategoriesByUser(userId));
         
         Console.WriteLine(categories.ToString());
 
@@ -86,11 +86,11 @@ public class CategoryController : Controller
         
         var category = _categoryInterface.GetCategory(id);
 
-        if (_categoryInterface.CategoryUniqueTitleByUser(category.user.id, id, updatedCategory.title))
+        /*if (!_categoryInterface.CategoryUniqueTitleByUser(category.user.id, category.id, updatedCategory.title))
         {
             ModelState.AddModelError("", "Title already used !");
             return StatusCode(403, ModelState);
-        }
+        }*/
 
         category.title = updatedCategory.title;
         category.image = updatedCategory.image;

@@ -4,5 +4,5 @@ public class UpdatedTransactionDto
 {
     public float amount { get; set; }
     public String title { get; set; }
-    public int type { get; set; }
+    public bool status { get; set; }
 }

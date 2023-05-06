@@ -11,7 +11,7 @@ public class Transaction
     [Required]
     public String title { get; set; }
     [Required]
-    public Type type { get; set; }
+    public bool status { get; set; }
     public DateTime createdAt { get; set; } = DateTime.UtcNow;
     public DateTime updatedAt { get; set; } = DateTime.UtcNow;
     public Category category { get; set; }

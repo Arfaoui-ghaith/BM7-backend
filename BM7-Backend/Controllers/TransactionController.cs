@@ -3,8 +3,6 @@ using BM7_Backend.Dto;
 using BM7_Backend.Interfaces;
 using BM7_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Type = BM7_Backend.Models.Type;
 
 namespace BM7_Backend.Controllers;
 
@@ -30,7 +28,7 @@ public class TransactionController : Controller
     public IActionResult GetTransactionsByUser(Guid userId)
     {
 
-        var transactions = _mapper.Map<List<Transaction>>(_transactionInterface.GetTransactionsByUser(userId));
+        var transactions = _mapper.Map<List<TransactionDto>>(_transactionInterface.GetTransactionsByUser(userId));
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -43,24 +41,24 @@ public class TransactionController : Controller
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [ProducesResponseType(422)]
-    public IActionResult CreateTransaction([FromBody] NewTransactionDto transaction)
+    public IActionResult CreateTransaction([FromBody] NewTransactionDto newTransaction)
     {
-        if (transaction == null)
+        if (newTransaction == null)
             return BadRequest();
         
-        if (!_categoryInterface.CategoryExists(transaction.categoryId))
+        if (!_categoryInterface.CategoryExists(newTransaction.categoryId))
             return NotFound();
         
-        var category = _categoryInterface.GetCategory(transaction.categoryId);
+        var category = _categoryInterface.GetCategory(newTransaction.categoryId);
         
         if (!ModelState.IsValid)
             return BadRequest();
 
-        var newTransaction = _mapper.Map<Transaction>(transaction);
+        var transaction = _mapper.Map<Transaction>(newTransaction);
         
-        newTransaction.category = category;
+        transaction.category = category;
 
-        if (!_transactionInterface.CreateTransaction(newTransaction))
+        if (!_transactionInterface.CreateTransaction(transaction))
         {
             ModelState.AddModelError("", "Something went wrong while saving!");
             return StatusCode(500, ModelState);
@@ -87,8 +85,7 @@ public class TransactionController : Controller
 
         transaction.amount = updatedTransaction.amount;
         transaction.title = updatedTransaction.title;
-        Type type = updatedTransaction.type == 0 ? Type.INCOME : Type.EXPENSE;
-        transaction.type = type;
+        transaction.status = updatedTransaction.status;
         transaction.updatedAt = DateTime.UtcNow;
 
         if (!ModelState.IsValid)

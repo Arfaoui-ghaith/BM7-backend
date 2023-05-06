@@ -22,9 +22,9 @@ public class CategoryRepository : CategoryInterface
         return _dbContext.Categories.FirstOrDefault(c => c.id == categoryId);
     }
 
-    public bool CategoryUniqueTitleByUser(Guid userId, Guid categoryId, string title)
+    public bool CategoryUniqueTitleByUser(Guid userId, Guid categoryId, String title)
     {
-        return _dbContext.Categories.Any(c => c.user.id == userId && c.title == title && c.id != categoryId);
+        return _dbContext.Categories.Any(c => (c.user.id == userId && c.title == title) && c.id != categoryId);
     }
 
     public bool CategoryExists(Guid id)

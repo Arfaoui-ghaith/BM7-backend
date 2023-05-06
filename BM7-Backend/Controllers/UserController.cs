@@ -44,7 +44,7 @@ public class UserController : Controller
         if (!_userInterface.UserExists(id))
             return NotFound();
         
-        var user = _mapper.Map<List<UserDto>>(_userInterface.GetUser(id));
+        var user = _mapper.Map<UserDto>(_userInterface.GetUser(id));
 
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

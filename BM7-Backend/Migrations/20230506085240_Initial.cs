@@ -56,7 +56,7 @@ namespace BM7_Backend.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     amount = table.Column<float>(type: "real", nullable: false),
                     title = table.Column<string>(type: "text", nullable: false),
-                    type = table.Column<int>(type: "integer", nullable: false),
+                    status = table.Column<bool>(type: "boolean", nullable: false),
                     createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     categoryid = table.Column<Guid>(type: "uuid", nullable: false)
