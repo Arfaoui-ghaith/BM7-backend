@@ -9,6 +9,8 @@ public interface UserInterface
     bool UserExists(Guid id);
 
     User? GetUser(Guid id);
+    
+    User? GetUserByEmail(String email);
 
     bool CheckUserByEmail(String email);
 

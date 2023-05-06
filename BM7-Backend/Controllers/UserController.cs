@@ -73,15 +73,15 @@ public class UserController : Controller
             ModelState.AddModelError("", "Password Not Match!");
             return StatusCode(401, ModelState);
         }
-        else
-        {
-            newUserDto.hash();
-        }
 
         if (!ModelState.IsValid)
             return BadRequest();
 
         var user = _mapper.Map<User>(newUserDto);
+        
+        var hmac = new HMACSHA512();
+        user.passwordSalt = hmac.Key;
+        user.passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(user.password));
 
         if (!_userInterface.CreateUser(user))
         {
@@ -144,8 +144,6 @@ public class UserController : Controller
             return NotFound();
 
         var user = _userInterface.GetUser(id);
-        
-        updatedUser.hash();
 
         if (user.password != updatedUser.current_password)
         {
@@ -158,9 +156,12 @@ public class UserController : Controller
             ModelState.AddModelError("", "Password Not Match!");
             return StatusCode(401, ModelState);
         }
-
-        user.password = updatedUser.password;
         
+        var hmac = new HMACSHA512();
+        
+        user.passwordSalt = hmac.Key;
+        user.passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(user.password));
+        user.password = updatedUser.password;
         user.updatedAt = DateTime.UtcNow;
 
         if (!ModelState.IsValid)
@@ -198,5 +199,5 @@ public class UserController : Controller
 
         return NoContent();
     }
-
+    
 }

@@ -27,6 +27,11 @@ public class UserRepository : UserInterface
         return _dbContext.Users.FirstOrDefault(u => u.id == id);
     }
 
+    public User? GetUserByEmail(string email)
+    {
+        return _dbContext.Users.FirstOrDefault(u => u.email == email);
+    }
+
     public bool CheckUserByEmail(string email)
     {
         return _dbContext.Users.Any(u => u.email == email);
