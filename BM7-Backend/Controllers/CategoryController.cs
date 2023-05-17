@@ -2,12 +2,14 @@ using AutoMapper;
 using BM7_Backend.Dto;
 using BM7_Backend.Interfaces;
 using BM7_Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BM7_Backend.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles="Client")]
 public class CategoryController : Controller
 {
     private readonly CategoryInterface _categoryInterface;

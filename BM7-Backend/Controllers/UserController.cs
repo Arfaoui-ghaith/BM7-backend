@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
@@ -5,13 +6,19 @@ using BM7_Backend.Dto;
 using BM7_Backend.Helper;
 using BM7_Backend.Interfaces;
 using BM7_Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using sib_api_v3_sdk.Api;
+using sib_api_v3_sdk.Client;
+using sib_api_v3_sdk.Model;
 
 namespace BM7_Backend.Controllers;
 
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles="Client")]
 public class UserController : Controller
 {
     private readonly UserInterface _userInterface;
@@ -118,6 +125,7 @@ public class UserController : Controller
         user.email = updatedUser.email;
         user.name = updatedUser.name;
         user.updatedAt = DateTime.UtcNow;
+        user.role = updatedUser.role;
 
         if (!ModelState.IsValid)
             return BadRequest();
@@ -199,5 +207,5 @@ public class UserController : Controller
 
         return NoContent();
     }
-    
+
 }
